@@ -1,0 +1,7 @@
+[package]
+name = "log-analyzer"
+description = "A concurrent log analyzer demo in Flix"
+version = "0.1.0"
+flix = "0.60.0"
+license = "Apache-2.0"
+authors = ["Omar Bouaziz"]
