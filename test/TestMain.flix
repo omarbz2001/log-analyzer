@@ -1,76 +1,68 @@
-// --- Parser tests ---
-
 @Test
-def testParseLine_validError(): Bool =
+def testParseLine_validError(): Unit \ Assert =
     match Parser.parseLine("2026-05-13 ERROR Database failed") {
-        case Some(_) => true
-        case None    => false
+        case Some(_) => Assert.assertTrue(true)
+        case None    => Assert.assertTrue(false)
     }
-
 @Test
-def testParseLine_validInfo(): Bool =
+def testParseLine_validInfo(): Unit \ Assert =
     match Parser.parseLine("2026-05-13 INFO User logged in") {
-        case Some(_) => true
-        case None    => false
+        case Some(_) => Assert.assertTrue(true)
+        case None    => Assert.assertTrue(false)
     }
 
 @Test
-def testParseLine_malformed(): Bool =
+def testParseLine_malformed(): Unit \ Assert =
     match Parser.parseLine("this is not valid") {
-        case Some(_) => false
-        case None    => true
+        case Some(_) => Assert.assertTrue(false)
+        case None    => Assert.assertTrue(true)
     }
 
 @Test
-def testParseLine_unknownLevel(): Bool =
+def testParseLine_unknownLevel(): Unit \ Assert =
     match Parser.parseLine("2026-05-13 CRITICAL Something") {
-        case Some(_) => false
-        case None    => true
+        case Some(_) => Assert.assertTrue(false)
+        case None    => Assert.assertTrue(true)
     }
-
-// --- Classifier tests ---
+@Test
+def testClassifier_keepError(): Unit \ Assert =
+    Assert.assertTrue(Classifier.keep(LogEntry.LogEntry("2026-05-13", LogLevel.Error, "msg")))
 
 @Test
-def testClassifier_keepError(): Bool =
-    Classifier.keep(LogEntry.LogEntry("2026-05-13", LogLevel.Error, "msg"))
+def testClassifier_keepInfo(): Unit \ Assert =
+    Assert.assertTrue(Classifier.keep(LogEntry.LogEntry("2026-05-13", LogLevel.Info, "msg")))
 
 @Test
-def testClassifier_keepInfo(): Bool =
-    Classifier.keep(LogEntry.LogEntry("2026-05-13", LogLevel.Info, "msg"))
+def testClassifier_dropDebug(): Unit \ Assert =
+    Assert.assertFalse(Classifier.keep(LogEntry.LogEntry("2026-05-13", LogLevel.Debug, "msg")))
 
 @Test
-def testClassifier_dropDebug(): Bool =
-    not Classifier.keep(LogEntry.LogEntry("2026-05-13", LogLevel.Debug, "msg"))
+def testClassifier_isAlert_error(): Unit \ Assert =
+    Assert.assertTrue(Classifier.isAlert(LogEntry.LogEntry("2026-05-13", LogLevel.Error, "msg")))
 
 @Test
-def testClassifier_isAlert_error(): Bool =
-    Classifier.isAlert(LogEntry.LogEntry("2026-05-13", LogLevel.Error, "msg"))
+def testClassifier_isAlert_warn(): Unit \ Assert =
+    Assert.assertFalse(Classifier.isAlert(LogEntry.LogEntry("2026-05-13", LogLevel.Warn, "msg")))
 
 @Test
-def testClassifier_isAlert_warn(): Bool =
-    not Classifier.isAlert(LogEntry.LogEntry("2026-05-13", LogLevel.Warn, "msg"))
-
-// --- Aggregator tests ---
-
-@Test
-def testAggregator_emptyIsZero(): Bool =
+def testAggregator_emptyIsZero(): Unit \ Assert =
     let LogSummary.LogSummary(e, w, i, d) = Aggregator.empty();
-    e == 0 and w == 0 and i == 0 and d == 0
+    Assert.assertTrue(e == 0 and w == 0 and i == 0 and d == 0)
 
 @Test
-def testAggregator_addError(): Bool =
+def testAggregator_addError(): Unit \ Assert =
     let summary = Aggregator.add(Aggregator.empty(), LogEntry.LogEntry("ts", LogLevel.Error, "msg"));
     let LogSummary.LogSummary(e, _, _, _) = summary;
-    e == 1
+    Assert.assertTrue(e == 1)
 
 @Test
-def testAggregator_addWarn(): Bool =
+def testAggregator_addWarn(): Unit \ Assert =
     let summary = Aggregator.add(Aggregator.empty(), LogEntry.LogEntry("ts", LogLevel.Warn, "msg"));
     let LogSummary.LogSummary(_, w, _, _) = summary;
-    w == 1
+    Assert.assertTrue(w == 1)
 
 @Test
-def testAggregator_addInfo(): Bool =
+def testAggregator_addInfo(): Unit \ Assert =
     let summary = Aggregator.add(Aggregator.empty(), LogEntry.LogEntry("ts", LogLevel.Info, "msg"));
     let LogSummary.LogSummary(_, _, i, _) = summary;
-    i == 1
+    Assert.assertTrue(i == 1)
